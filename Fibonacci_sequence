@@ -1,0 +1,44 @@
+from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+# HTML Template
+template = """
+<!doctype html>
+<title>Fibonacci Sequence Generator</title>
+<h2>Fibonacci Sequence Generator</h2>
+<form method="post">
+    <label>Enter number of terms: <input type="number" name="terms" min="1" required></label>
+    <input type="submit" value="Generate">
+</form>
+
+{% if sequence %}
+    <h3>Fibonacci Sequence ({{ terms }} terms):</h3>
+    <p>{{ sequence }}</p>
+{% endif %}
+"""
+
+# Function to generate Fibonacci sequence
+def generate_fibonacci(n):
+    sequence = []
+    a, b = 0, 1
+    for _ in range(n):
+        sequence.append(a)
+        a, b = b, a + b
+    return sequence
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    sequence = []
+    terms = 0
+    if request.method == 'POST':
+        try:
+            terms = int(request.form['terms'])
+            if terms > 0:
+                sequence = generate_fibonacci(terms)
+        except ValueError:
+            pass
+    return render_template_string(template, sequence=sequence, terms=terms)
+
+if __name__ == '__main__':
+    app.run(debug=True)
