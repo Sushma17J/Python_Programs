@@ -1,0 +1,45 @@
+from flask import Flask, request, render_template_string
+from collections import Counter
+import re
+
+app = Flask(__name__)
+
+# HTML template string
+template = """
+<!doctype html>
+<title>Word Counter</title>
+<h2>Upload a Text File to Count Words</h2>
+<form method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".txt" required>
+    <input type="submit" value="Upload and Count">
+</form>
+
+{% if word_counts %}
+    <h3>Word Frequency:</h3>
+    <table border="1" cellpadding="5">
+        <tr><th>Word</th><th>Count</th></tr>
+        {% for word, count in word_counts %}
+            <tr><td>{{ word }}</td><td>{{ count }}</td></tr>
+        {% endfor %}
+    </table>
+{% endif %}
+"""
+
+# Function to count words from a string
+def count_words(text):
+    words = re.findall(r'\b\w+\b', text.lower())
+    counter = Counter(words)
+    return sorted(counter.items())
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    word_counts = []
+    if request.method == 'POST':
+        uploaded_file = request.files.get('file')
+        if uploaded_file and uploaded_file.filename.endswith('.txt'):
+            content = uploaded_file.read().decode('utf-8')
+            word_counts = count_words(content)
+    return render_template_string(template, word_counts=word_counts)
+
+if __name__ == '__main__':
+    app.run(debug=True)
