@@ -1,0 +1,53 @@
+from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+html = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Temperature Converter</title>
+</head>
+<body>
+    <h2>Temperature Converter</h2>
+    <form method="POST">
+        <label>Enter Temperature:</label>
+        <input type="text" name="temperature" required>
+        <br><br>
+        <label>Select Unit:</label>
+        <select name="unit">
+            <option value="C">Celsius</option>
+            <option value="F">Fahrenheit</option>
+        </select>
+        <br><br>
+        <input type="submit" value="Convert">
+    </form>
+
+    {% if result %}
+        <h3>Result: {{ result }}</h3>
+    {% endif %}
+</body>
+</html>
+'''
+
+@app.route('/', methods=['GET', 'POST'])
+def convert_temperature():
+    result = None
+    if request.method == 'POST':
+        try:
+            temp = float(request.form['temperature'])
+            unit = request.form['unit']
+
+            if unit == 'C':
+                converted = (temp * 9/5) + 32
+                result = f"{temp}°C = {converted:.2f}°F"
+            elif unit == 'F':
+                converted = (temp - 32) * 5/9
+                result = f"{temp}°F = {converted:.2f}°C"
+        except ValueError:
+            result = "Invalid input. Please enter a valid number."
+
+    return render_template_string(html, result=result)
+
+if __name__ == '__main__':
+    app.run(debug=True)
