@@ -1,0 +1,40 @@
+from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+# HTML template
+HTML_PAGE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Palindrome Checker</title>
+</head>
+<body>
+    <h2>Palindrome Checker</h2>
+    <form method="post">
+        <input type="text" name="text" placeholder="Enter text" required>
+        <button type="submit">Check</button>
+    </form>
+    {% if result is not none %}
+        <h3>Result: "{{ original }}" {% if result %}is a palindrome ✅{% else %}is not a palindrome ❌{% endif %}</h3>
+    {% endif %}
+</body>
+</html>
+"""
+
+# Function to check palindrome
+def is_palindrome(s):
+    cleaned = ''.join(char.lower() for char in s if char.isalnum())
+    return cleaned == cleaned[::-1]
+
+@app.route('/', methods=['GET', 'POST'])
+def check_palindrome():
+    result = None
+    original = ""
+    if request.method == 'POST':
+        original = request.form['text']
+        result = is_palindrome(original)
+    return render_template_string(HTML_PAGE, result=result, original=original)
+
+if __name__ == '__main__':
+    app.run(debug=True)
