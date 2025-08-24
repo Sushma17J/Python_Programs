@@ -1,0 +1,68 @@
+from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+# HTML template for 2-number calculator
+HTML_FORM = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Calculator</title>
+</head>
+<body>
+    <h2>Basic Calculator (Two Numbers)</h2>
+    <form method="post">
+        <input type="number" name="num1" step="any" required> Number 1<br><br>
+        <input type="number" name="num2" step="any" required> Number 2<br><br>
+        <label>Select Operation:</label><br>
+        <select name="operation" required>
+            <option value="+">Addition (+)</option>
+            <option value="-">Subtraction (-)</option>
+            <option value="*">Multiplication (×)</option>
+            <option value="/">Division (/)</option>
+            <option value="%">Modulus (%)</option>
+        </select><br><br>
+        <button type="submit">Calculate</button>
+    </form>
+
+    {% if result is not none %}
+        <h3>Result: {{ result }}</h3>
+    {% endif %}
+</body>
+</html>
+"""
+
+@app.route('/', methods=['GET', 'POST'])
+def calculator():
+    result = None
+    if request.method == 'POST':
+        try:
+            num1 = float(request.form['num1'])
+            num2 = float(request.form['num2'])
+            operation = request.form['operation']
+
+            if operation == '+':
+                result = num1 + num2
+            elif operation == '-':
+                result = num1 - num2
+            elif operation == '*':
+                result = num1 * num2
+            elif operation == '/':
+                if num2 == 0:
+                    result = "Error: Division by zero!"
+                else:
+                    result = num1 / num2
+            elif operation == '%':
+                if num2 == 0:
+                    result = "Error: Modulo by zero!"
+                else:
+                    result = num1 % num2
+            else:
+                result = "Invalid operation."
+        except Exception as e:
+            result = f"Error: {str(e)}"
+    
+    return render_template_string(HTML_FORM, result=result)
+
+if __name__ == '__main__':
+    app.run(debug=True)
