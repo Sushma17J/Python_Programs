@@ -1,0 +1,33 @@
+from flask import Flask, request, render_template_string
+
+app = Flask(__name__)
+
+HTML_TEMPLATE = '''
+    <h2>Email Validator</h2>
+    <form method="POST">
+        Enter email: <input type="text" name="email">
+        <input type="submit" value="Validate">
+    </form>
+    {% if result is not none %}
+        <p>{{ result }}</p>
+    {% endif %}
+'''
+
+def is_valid_email(email):
+    if '@' not in email or '.' not in email:
+        return False
+    local, _, domain = email.partition('@')
+    if not local or not domain or '.' not in domain:
+        return False
+    return True
+
+@app.route('/', methods=['GET', 'POST'])
+def validate():
+    result = None
+    if request.method == 'POST':
+        email = request.form['email']
+        result = "✅ Valid email!" if is_valid_email(email) else "❌ Invalid email!"
+    return render_template_string(HTML_TEMPLATE, result=result)
+
+if __name__ == '__main__':
+    app.run(debug=True)
